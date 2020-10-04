@@ -1,4 +1,5 @@
-import {Entity, model, property} from '@loopback/repository';
+import {Entity, hasOne, model, property} from '@loopback/repository';
+import {UserCredentials} from './user-credentials.model';
 
 @model({
   settings: {
@@ -9,31 +10,60 @@ import {Entity, model, property} from '@loopback/repository';
     strict: true,
  }
 })
-export class User extends Entity {
+export class User extends Entity/* extends UserJWT */{
+
   @property({
-    type: 'number',
+    type: 'string',
     id: true,
-    generated: true,
+    generated: true
   })
-  id?: number;
+  id: string;
+
+  @property({
+    type: 'string',
+  })
+  name?: string;
+
+
+  @property({
+    type: 'string',
+  })
+  username?: string;
+
+  @property({
+    type: 'string',
+  })
+  realm?: string;
 
   @property({
     type: 'string',
     required: true,
+    index: {
+      unique: true,
+    },
   })
-  nome: string;
+  email: string;
+
+  @property({
+    type: 'boolean',
+    name:'email_verified'
+  })
+  emailVerified?: boolean;
 
   @property({
     type: 'string',
-    required: true,
+    name:'verification_token'
   })
-  login: string;
+  verificationToken?: string;
 
   @property({
     type: 'string',
-    required: true,
   })
-  senha: string;
+  role?: string;
+
+  @hasOne(() => UserCredentials)
+  userCredentials: UserCredentials;
+
 
   @property({
     type: 'date',
@@ -58,3 +88,20 @@ export interface UserRelations {
 }
 
 export type UserWithRelations = User & UserRelations;
+
+@model()
+export class NewUserRequest extends User {
+  @property({
+    type: 'string',
+    required: true,
+  })
+  password: string;
+}
+
+
+export const enum RolesTypes {
+  Atendente = 'atendente',
+  Gerente ='gerente',
+  Instrutor = 'instrutor',
+  Nutricionista ='nutricionista'
+}
