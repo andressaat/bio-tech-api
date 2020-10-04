@@ -1,3 +1,16 @@
+import {authenticate, TokenService} from '@loopback/authentication';
+import {
+  Credentials,
+  MyUserService,
+  RefreshTokenService,
+  RefreshTokenServiceBindings,
+  TokenObject,
+  TokenServiceBindings,
+  User,
+  UserRepository,
+  UserServiceBindings
+} from '@loopback/authentication-jwt';
+import {inject} from '@loopback/core';
 import {
   Count,
   CountSchema,
@@ -7,38 +20,82 @@ import {
   Where
 } from '@loopback/repository';
 import {
-  del, get,
+  del,
+  get,
   getModelSchemaRef,
-
-
-
-
-
-
-
-
-
-
-  HttpErrors, param,
-
-
-  patch, post,
-
-
-
-
+  param,
+  patch,
+  post,
   put,
-
-  requestBody
+  requestBody,
+  SchemaObject
 } from '@loopback/rest';
+import {SecurityBindings, securityId, UserProfile} from '@loopback/security';
 import * as bcrypt from 'bcrypt';
-import {User} from '../models';
-import {UserRepository} from '../repositories';
+import {genSalt, hash} from 'bcryptjs';
+import {NewUserRequest} from '../models';
+
+
+// Describes the type of grant object taken in by method "refresh"
+type RefreshGrant = {
+  refreshToken: string;
+};
+
+// Describes the schema of grant object
+const RefreshGrantSchema: SchemaObject = {
+  type: 'object',
+  required: ['refreshToken'],
+  properties: {
+    refreshToken: {
+      type: 'string',
+    },
+  },
+};
+
+// Describes the request body of grant object
+const RefreshGrantRequestBody = {
+  description: 'Reissuing Acess Token',
+  required: true,
+  content: {
+    'application/json': {schema: RefreshGrantSchema},
+  },
+};
+
+const CredentialsSchema = {
+  type: 'object',
+  required: ['email', 'password'],
+  properties: {
+    email: {
+      type: 'string',
+      format: 'email',
+    },
+    password: {
+      type: 'string',
+      minLength: 8,
+    },
+  },
+};
+
+export const CredentialsRequestBody = {
+  description: 'The input of login function',
+  required: true,
+  content: {
+    'application/json': {schema: CredentialsSchema},
+  },
+};
 
 export class UserController {
   constructor(
     @repository(UserRepository)
     public userRepository: UserRepository,
+    @inject(TokenServiceBindings.TOKEN_SERVICE)
+    public jwtService: TokenService,
+    @inject(UserServiceBindings.USER_SERVICE)
+    public userService: MyUserService,
+    @inject(SecurityBindings.USER, {optional: true})
+    public user: UserProfile,
+    @inject(RefreshTokenServiceBindings.REFRESH_TOKEN_SERVICE)
+    public refreshService: RefreshTokenService,
   ) {}
 
   @post('/users', {
@@ -62,7 +119,7 @@ export class UserController {
     })
     user: Omit<User, 'id'>,
   ): Promise<User> {
-    user.senha = await bcrypt.hash(user.senha, process.env.PASS_SALT ?? 10)
+    user.senha = await bcrypt.hash(user.senha, process.env.PASS_SALT ?? 10);
     return this.userRepository.create(user);
   }
 
@@ -74,9 +131,7 @@ export class UserController {
       },
     },
   })
-  async count(
-    @param.where(User) where?: Where<User>,
-  ): Promise<Count> {
+  async count(@param.where(User) where?: Where<User>): Promise<Count> {
     return this.userRepository.count(where);
   }
 
@@ -95,9 +150,7 @@ export class UserController {
       },
     },
   })
-  async find(
-    @param.filter(User) filter?: Filter<User>,
-  ): Promise<User[]> {
+  async find(@param.filter(User) filter?: Filter<User>): Promise<User[]> {
     return this.userRepository.find(filter);
   }
 
@@ -136,8 +189,8 @@ export class UserController {
     },
   })
   async findById(
-    @param.path.number('id') id: number,
-    @param.filter(User, {exclude: 'where'}) filter?: FilterExcludingWhere<User>
+    @param.path.number('id') id: string,
+    @param.filter(User, {exclude: 'where'}) filter?: FilterExcludingWhere<User>,
   ): Promise<User> {
     return this.userRepository.findById(id, filter);
   }
@@ -150,7 +203,7 @@ export class UserController {
     },
   })
   async updateById(
-    @param.path.number('id') id: number,
+    @param.path.number('id') id: string,
     @requestBody({
       content: {
         'application/json': {
@@ -171,7 +224,7 @@ export class UserController {
     },
   })
   async replaceById(
-    @param.path.number('id') id: number,
+    @param.path.number('id') id: string,
     @requestBody() user: User,
   ): Promise<void> {
     await this.userRepository.replaceById(id, user);
@@ -184,11 +237,11 @@ export class UserController {
       },
     },
   })
-  async deleteById(@param.path.number('id') id: number): Promise<void> {
+  async deleteById(@param.path.number('id') id: string): Promise<void> {
     await this.userRepository.deleteById(id);
   }
 
-  @post('/login', {
+  @post('/users/login', {
     responses: {
       '200': {
         description: 'User login',
@@ -197,45 +250,139 @@ export class UserController {
     },
   })
   async login(
-    @requestBody({
-      content: {
-        'application/json': {
-          schema: {
-            properties: {
-              login: {
-                type: 'string'
-              },
-              senha: {
-                type: 'string'
-              },
-            }
+    @requestBody(CredentialsRequestBody) credentials: Credentials,
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+  ): Promise<{token: string}> {
+    // ensure the user exists, and the password is correct
+    const user = await this.userService.verifyCredentials(credentials);
+    // convert a User object into a UserProfile object (reduced set of properties)
+    const userProfile = this.userService.convertToUserProfile(user);
+
+    // create a JSON Web Token based on the user profile
+    const token = await this.jwtService.generateToken(userProfile);
+    return {token};
+  }
+
+  // @authorize({allowedRoles: [RolesTypes.Gerente]})
+  @authenticate('jwt')
+  @get('/whoAmI', {
+    responses: {
+      '200': {
+        description: '',
+        schema: {
+          type: 'string',
+        },
+      },
+    },
+  })
+  async whoAmI(): Promise<string> {
+    console.log('teste', this.user)
+    return this.user[securityId];
+  }
+
+  @post('/signup', {
+    responses: {
+      '200': {
+        description: 'User',
+        content: {
+          'application/json': {
+            schema: {
+              'x-ts-type': User,
+            },
           },
         },
       },
+    },
+  })
+  async signUp(
+    @requestBody({
+      content: {
+        'application/json': {
+          schema: CredentialsSchema,
+        },
+      },
     })
-    data: {login: string; senha: string},
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-  ): Promise<{access_token: string, user: User}> {
+    newUserRequest: NewUserRequest,
+  ): Promise<User> {
+    const password = await hash(newUserRequest.password, await genSalt());
+    delete (newUserRequest as Partial<NewUserRequest>).password;
+    const savedUser = await this.userRepository.create(newUserRequest as User);
 
+    await this.userRepository.userCredentials(savedUser.id).create({password});
 
-    const user = await this.userRepository.findOne({where: {login: data.login}});
-    if (!user) {
-      throw new HttpErrors.Forbidden('Invalid User!');
-    }
-
-    const isValid = await bcrypt.compare(
-      data.senha,
-      user.senha,
-    );
-
-    if (!isValid) {
-      throw new HttpErrors.Forbidden('Invalid password!');
-    }
-
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    return {
-      access_token: new Date().getTime().toString(),
-      user
-    }
+    return savedUser;
   }
+
+  /**
+   * A login function that returns refresh token and access token.
+   * @param credentials User email and password
+   */
+  @post('/users/refresh-login', {
+    responses: {
+      '200': {
+        description: 'Token',
+        content: {
+          'application/json': {
+            schema: {
+              type: 'object',
+              properties: {
+                accessToken: {
+                  type: 'string',
+                },
+                refreshToken: {
+                  type: 'string',
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  })
+  async refreshLogin(
+    @requestBody(CredentialsRequestBody) credentials: Credentials,
+  ): Promise<TokenObject> {
+    // ensure the user exists, and the password is correct
+    const user = await this.userService.verifyCredentials(credentials);
+    console.log('user: ', user);
+    // convert a User object into a UserProfile object (reduced set of properties)
+    const userProfile: UserProfile = this.userService.convertToUserProfile(
+      user,
+    );
+    console.log('userProfile: ', userProfile);
+    const accessToken = await this.jwtService.generateToken(userProfile);
+    console.log('accessToken: ', accessToken);
+    const tokens = await this.refreshService.generateToken(
+      userProfile,
+      accessToken,
+    );
+    console.log('tokens: ', tokens);
+    return tokens;
+  }
+
+  @post('/refresh', {
+    responses: {
+      '200': {
+        description: 'Token',
+        content: {
+          'application/json': {
+            schema: {
+              type: 'object',
+              properties: {
+                accessToken: {
+                  type: 'object',
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  })
+  async refresh(
+    @requestBody(RefreshGrantRequestBody) refreshGrant: RefreshGrant,
+  ): Promise<TokenObject> {
+    return this.refreshService.refreshToken(refreshGrant.refreshToken);
+  }
+
 }

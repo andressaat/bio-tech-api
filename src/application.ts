@@ -1,15 +1,30 @@
+import {AuthenticationComponent} from '@loopback/authentication';
+import {
+  JWTAuthenticationComponent,
+
+  RefreshTokenServiceBindings,
+
+  TokenServiceBindings,
+
+  UserServiceBindings
+} from '@loopback/authentication-jwt';
+import {AuthorizationComponent, AuthorizationDecision, AuthorizationOptions, AuthorizationTags} from '@loopback/authorization';
 import {BootMixin} from '@loopback/boot';
 import {ApplicationConfig} from '@loopback/core';
-import {
-  RestExplorerBindings,
-  RestExplorerComponent,
-} from '@loopback/rest-explorer';
 import {RepositoryMixin} from '@loopback/repository';
 import {RestApplication} from '@loopback/rest';
+import {
+  RestExplorerBindings,
+  RestExplorerComponent
+} from '@loopback/rest-explorer';
 import {ServiceMixin} from '@loopback/service-proxy';
 import path from 'path';
+import {MyAuthorizationProvider} from './authorization-provider';
+import {DbDataSource} from './datasources';
+import {UserRepository} from './repositories';
+import {UserCredentialsRepository} from './repositories/user-credentials.repository';
 import {MySequence} from './sequence';
-
+import {CustomUserService} from './services';
 export {ApplicationConfig};
 
 export class BioTechApiApplication extends BootMixin(
@@ -40,5 +55,49 @@ export class BioTechApiApplication extends BootMixin(
         nested: true,
       },
     };
+
+    // Mount authentication system
+    this.component(AuthenticationComponent);
+    // Mount jwt component
+    this.component(JWTAuthenticationComponent);
+    // Bind datasource
+    this.dataSource(DbDataSource, UserServiceBindings.DATASOURCE_NAME);
+
+    // Bind user service
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    this.bind(UserServiceBindings.USER_SERVICE).toClass(CustomUserService as any);
+    // Bind user and credentials repository
+    this.bind(UserServiceBindings.USER_REPOSITORY).toClass(
+      UserRepository,
+    );
+    this.bind(UserServiceBindings.USER_CREDENTIALS_REPOSITORY).toClass(
+      UserCredentialsRepository,
+    );
+
+    // for jwt access token
+    this.bind(TokenServiceBindings.TOKEN_SECRET).to("<yourSecret>");
+    // Bind datasource
+    this.dataSource(DbDataSource, RefreshTokenServiceBindings.DATASOURCE_NAME);
+    // for refresh token
+    this.bind(RefreshTokenServiceBindings.REFRESH_SECRET).to("<yourSecret>");
+    // for jwt access token expiration
+    this.bind(TokenServiceBindings.TOKEN_EXPIRES_IN).to("3600000");// 1h
+    // for refresh token expiration
+    this.bind(RefreshTokenServiceBindings.REFRESH_EXPIRES_IN).to("86400000"); // 1d
+
+
+    // Roles config component
+    const authorizationOptions: AuthorizationOptions = {
+      precedence: AuthorizationDecision.DENY,
+      defaultDecision: AuthorizationDecision.DENY,
+    };
+
+    const binding = this.component(AuthorizationComponent);
+    this.configure(binding.key).to(authorizationOptions);
+
+    this
+      .bind('authorizationProviders.my-authorizer-provider')
+      .toProvider(MyAuthorizationProvider)
+      .tag(AuthorizationTags.AUTHORIZER);
   }
 }
