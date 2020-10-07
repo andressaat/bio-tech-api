@@ -268,16 +268,15 @@ export class UserController {
   @get('/whoAmI', {
     responses: {
       '200': {
-        description: '',
-        schema: {
-          type: 'string',
+        '200': {
+          description: 'User',
+          content: {'application/json': {schema: getModelSchemaRef(User)}},
         },
       },
     },
   })
-  async whoAmI(): Promise<string> {
-    console.log('teste', this.user)
-    return this.user[securityId];
+  async whoAmI(): Promise<User> {
+    return this.userRepository.findById(this.user[securityId]) ;
   }
 
   @post('/signup', {

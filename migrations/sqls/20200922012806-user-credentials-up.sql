@@ -23,3 +23,19 @@ CREATE TRIGGER set_updated_at_timestamp
 BEFORE UPDATE ON biotech_schema.user_credentials
 FOR EACH ROW
 EXECUTE PROCEDURE set_updated_at_timestamp();
+
+CREATE OR REPLACE FUNCTION biotech_schema.create_user_credentials() RETURNS void AS
+$create_user_credentials$
+  DECLARE
+    _user biotech_schema.users;
+  BEGIN
+     FOR _user IN SELECT * FROM biotech_schema.users
+      LOOP
+        INSERT INTO biotech_schema.user_credentials("password","user_id")
+          VALUES -- 12345678
+          ('$2a$10$tSiAHgbtIABm6yx7nwweueG.mPvXv3U73kW.vlH6t.cijWXJj3AdK', _user.id);
+      END LOOP;
+  END;
+$create_user_credentials$ LANGUAGE plpgsql;
+
+SELECT biotech_schema.create_user_credentials();
