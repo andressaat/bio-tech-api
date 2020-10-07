@@ -11,7 +11,7 @@ const config = {
   database: process.env.DB_DATABASE,
   schema: process.env.DB_SCHEMA,
   // url: '',
-  ssl: process.env.DB_SSL === 'true' ? true : false,
+  ssl: false,
 };
 
 // Observe application's life cycle to disconnect the datasource when
