@@ -40,27 +40,27 @@ BEFORE UPDATE ON biotech_schema.users
 FOR EACH ROW
 EXECUTE PROCEDURE set_updated_at_timestamp();
 
--- INSERT INTO biotech_schema.users
--- ("nome", "login","senha")
--- values
--- ('Atendente','atendente', '$2b$10$JQEex8MHghh3JTrtWFDAyuW8m.Zs2DnrkrrFsf6lQTEMWkvGu8e6e'); -- 123
+INSERT INTO biotech_schema.users
+("name", "email","role")
+values
+('Atendente','atendente@biotech.com.br','atendente'); -- 12345678
 
--- INSERT INTO biotech_schema.users
--- ("nome", "login","senha")
--- values
--- ('Gerente','gerente', '$2b$10$d89.8qfWhSsJDua2NmBy8e0BMhQitGN3M70J5stx91zYWOUOSimBq'); -- 1234
+INSERT INTO biotech_schema.users
+("name", "email","role")
+values
+('Gerente','gerente@biotech.com.br', 'gerente'); -- 12345678
 
--- INSERT INTO biotech_schema.users
--- ("nome", "login","senha")
--- values
--- ('Instrutor','instrutor', '$2b$10$MvZEKHIZIzZaaT3eFoNQZuVo5sl7j4YBUNwPwilsxpNVaPtESFPoe'); -- 12345
+INSERT INTO biotech_schema.users
+("name", "email","role")
+values
+('Instrutor','instrutor@biotech.com.br', 'instrutor'); -- 12345678
 
--- INSERT INTO biotech_schema.users
--- ("nome", "login","senha")
--- values
--- ('Nutricionista','nutricionista', '$2b$10$y992Q9KAOZHCXO7OLuQurer7IEPmUuXfuJ9pwRGY3nGUglA23zLAu'); -- 123456
+INSERT INTO biotech_schema.users
+("name", "email","role")
+values
+('Nutricionista','nutricionista@biotech.com.br', 'nutricionista'); -- 12345678
 
--- INSERT INTO biotech_schema.users
--- ("nome", "login","senha")
--- values
--- ('Atendente02','atendente02', '$2b$10$y992Q9KAOZHCXO7OLuQurer7IEPmUuXfuJ9pwRGY3nGUglA23zLAu'); -- 123456
+INSERT INTO biotech_schema.users
+("name", "email","role")
+values
+('Atendente02','atendente02@biotech.com.br', 'atendente'); -- 12345678
