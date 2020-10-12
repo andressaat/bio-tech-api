@@ -8,6 +8,7 @@ import {UserRepository} from '../repositories';
 
 
 export type Credentials = {
+  id?: string;
   email: string;
   password: string;
 };
@@ -44,12 +45,11 @@ export class CustomUserService implements UserService<User, Credentials>{
       throw new HttpErrors.Unauthorized(invalidCredentialsError);
     }
 
-    console.log('verifyCredentials: ', foundUser);
     return foundUser;
   }
 
   //function to find user by id
-  async findUserById(id: string) {
+  async findUserById(id: string): Promise<User> {
     const userNotfound = 'invalid User';
     const foundUser = await this.userRepository.findOne({
       where: {id: id},
@@ -59,16 +59,14 @@ export class CustomUserService implements UserService<User, Credentials>{
       throw new HttpErrors.Unauthorized(userNotfound);
     }
 
-    console.log('findUserById: ', foundUser);
     return foundUser;
   }
 
   convertToUserProfile(user: User): UserProfile {
-    console.log('convert:', user);
     return {
       [securityId]: user.id.toString(),
       role: user.role,
-      name: user.name,
+      name: user.username,
       id: user.id,
       email: user.email,
     };

@@ -1,11 +1,8 @@
 import {AuthenticationComponent} from '@loopback/authentication';
 import {
   JWTAuthenticationComponent,
-
   RefreshTokenServiceBindings,
-
   TokenServiceBindings,
-
   UserServiceBindings
 } from '@loopback/authentication-jwt';
 import {AuthorizationComponent, AuthorizationDecision, AuthorizationOptions, AuthorizationTags} from '@loopback/authorization';
@@ -24,7 +21,7 @@ import {DbDataSource} from './datasources';
 import {UserRepository} from './repositories';
 import {UserCredentialsRepository} from './repositories/user-credentials.repository';
 import {MySequence} from './sequence';
-import {CustomUserService} from './services';
+import {CustomJWTService, CustomUserService} from './services';
 export {ApplicationConfig};
 
 export class BioTechApiApplication extends BootMixin(
@@ -58,6 +55,21 @@ export class BioTechApiApplication extends BootMixin(
 
     // Mount authentication system
     this.component(AuthenticationComponent);
+    // Roles config component
+    const authorizationOptions: AuthorizationOptions = {
+      precedence: AuthorizationDecision.DENY,
+      defaultDecision: AuthorizationDecision.DENY,
+    };
+
+    const binding = this.component(AuthorizationComponent);
+    this.configure(binding.key).to(authorizationOptions);
+
+    this
+      .bind('authorizationProviders.my-authorizer-provider')
+      .toProvider(MyAuthorizationProvider)
+      .tag(AuthorizationTags.AUTHORIZER);
+    // provider
+    // this.bind(AuthenticationBindings.AUTH_ACTION).toProvider(AuthenticateActionProvider);
     // Mount jwt component
     this.component(JWTAuthenticationComponent);
     // Bind datasource
@@ -74,6 +86,7 @@ export class BioTechApiApplication extends BootMixin(
       UserCredentialsRepository,
     );
 
+    this.bind(TokenServiceBindings.TOKEN_SERVICE).toClass(CustomJWTService);
     // for jwt access token
     this.bind(TokenServiceBindings.TOKEN_SECRET).to("<yourSecret>");
     // Bind datasource
@@ -81,23 +94,9 @@ export class BioTechApiApplication extends BootMixin(
     // for refresh token
     this.bind(RefreshTokenServiceBindings.REFRESH_SECRET).to("<yourSecret>");
     // for jwt access token expiration
-    this.bind(TokenServiceBindings.TOKEN_EXPIRES_IN).to("3600000");// 1h
+    this.bind(TokenServiceBindings.TOKEN_EXPIRES_IN).to("3600");// 1h 3600
     // for refresh token expiration
-    this.bind(RefreshTokenServiceBindings.REFRESH_EXPIRES_IN).to("86400000"); // 1d
+    this.bind(RefreshTokenServiceBindings.REFRESH_EXPIRES_IN).to("86400"); // 1d
 
-
-    // Roles config component
-    const authorizationOptions: AuthorizationOptions = {
-      precedence: AuthorizationDecision.DENY,
-      defaultDecision: AuthorizationDecision.DENY,
-    };
-
-    const binding = this.component(AuthorizationComponent);
-    this.configure(binding.key).to(authorizationOptions);
-
-    this
-      .bind('authorizationProviders.my-authorizer-provider')
-      .toProvider(MyAuthorizationProvider)
-      .tag(AuthorizationTags.AUTHORIZER);
   }
 }

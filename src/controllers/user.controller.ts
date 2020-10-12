@@ -1,4 +1,4 @@
-import {authenticate, TokenService} from '@loopback/authentication';
+import {authenticate, AuthenticationBindings, TokenService} from '@loopback/authentication';
 import {
   Credentials,
   MyUserService,
@@ -10,7 +10,8 @@ import {
   UserRepository,
   UserServiceBindings
 } from '@loopback/authentication-jwt';
-import {inject} from '@loopback/core';
+import {authorize} from '@loopback/authorization';
+import {Getter, inject} from '@loopback/core';
 import {
   Count,
   CountSchema,
@@ -33,7 +34,7 @@ import {
 import {SecurityBindings, securityId, UserProfile} from '@loopback/security';
 import * as bcrypt from 'bcrypt';
 import {genSalt, hash} from 'bcryptjs';
-import {NewUserRequest} from '../models';
+import {NewUserRequest, RolesTypes} from '../models';
 
 
 // Describes the type of grant object taken in by method "refresh"
@@ -96,8 +97,12 @@ export class UserController {
     public user: UserProfile,
     @inject(RefreshTokenServiceBindings.REFRESH_TOKEN_SERVICE)
     public refreshService: RefreshTokenService,
+    @inject.getter(AuthenticationBindings.CURRENT_USER)
+    public getCurrentUser: Getter<User>,
   ) {}
 
+  @authorize({allowedRoles: [RolesTypes.Gerente]})
+  @authenticate('jwt')
   @post('/users', {
     responses: {
       '200': {
@@ -154,6 +159,8 @@ export class UserController {
     return this.userRepository.find(filter);
   }
 
+  @authorize({allowedRoles: [RolesTypes.Gerente]})
+  @authenticate('jwt')
   @patch('/users', {
     responses: {
       '200': {
@@ -176,6 +183,7 @@ export class UserController {
     return this.userRepository.updateAll(user, where);
   }
 
+  @authenticate('jwt')
   @get('/users/{id}', {
     responses: {
       '200': {
@@ -194,7 +202,8 @@ export class UserController {
   ): Promise<User> {
     return this.userRepository.findById(id, filter);
   }
-
+  @authorize({allowedRoles: [RolesTypes.Gerente]})
+  @authenticate('jwt')
   @patch('/users/{id}', {
     responses: {
       '204': {
@@ -216,6 +225,8 @@ export class UserController {
     await this.userRepository.updateById(id, user);
   }
 
+  @authorize({allowedRoles: [RolesTypes.Gerente]})
+  @authenticate('jwt')
   @put('/users/{id}', {
     responses: {
       '204': {
@@ -230,6 +241,8 @@ export class UserController {
     await this.userRepository.replaceById(id, user);
   }
 
+  @authorize({allowedRoles: [RolesTypes.Gerente]})
+  @authenticate('jwt')
   @del('/users/{id}', {
     responses: {
       '204': {
@@ -263,7 +276,6 @@ export class UserController {
     return {token};
   }
 
-  // @authorize({allowedRoles: [RolesTypes.Gerente]})
   @authenticate('jwt')
   @get('/whoAmI', {
     responses: {
@@ -275,8 +287,11 @@ export class UserController {
       },
     },
   })
-  async whoAmI(): Promise<User> {
+  async whoAmI(
+
+  ): Promise<User> {
     return this.userRepository.findById(this.user[securityId]) ;
+    // return this.getCurrentUser();
   }
 
   @post('/signup', {
@@ -343,19 +358,15 @@ export class UserController {
   ): Promise<TokenObject> {
     // ensure the user exists, and the password is correct
     const user = await this.userService.verifyCredentials(credentials);
-    console.log('user: ', user);
     // convert a User object into a UserProfile object (reduced set of properties)
     const userProfile: UserProfile = this.userService.convertToUserProfile(
       user,
     );
-    console.log('userProfile: ', userProfile);
     const accessToken = await this.jwtService.generateToken(userProfile);
-    console.log('accessToken: ', accessToken);
     const tokens = await this.refreshService.generateToken(
       userProfile,
       accessToken,
     );
-    console.log('tokens: ', tokens);
     return tokens;
   }
 
