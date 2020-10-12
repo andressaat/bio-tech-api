@@ -17,7 +17,6 @@ export class MyAuthorizationProvider implements Provider<Authorizer> {
   ) {
     const clientRole = authorizationCtx.principals[0].role;
     const allowedRoles = metadata.allowedRoles;
-    console.log('check: ', authorizationCtx)
     return allowedRoles?.includes(clientRole)
       ? AuthorizationDecision.ALLOW
       : AuthorizationDecision.DENY;

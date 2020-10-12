@@ -77,6 +77,7 @@ export class User extends Entity/* extends UserJWT */{
   })
   updatedAt?: string;
 
+  [prop: string]: any;
 
   constructor(data?: Partial<User>) {
     super(data);

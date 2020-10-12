@@ -1,22 +1,21 @@
+import {authenticate} from '@loopback/authentication';
+import {authorize} from '@loopback/authorization';
 import {
   Count,
   CountSchema,
   Filter,
   FilterExcludingWhere,
   repository,
-  Where,
+  Where
 } from '@loopback/repository';
 import {
-  post,
-  param,
-  get,
-  getModelSchemaRef,
-  patch,
+  del, get,
+  getModelSchemaRef, param,
+  patch, post,
   put,
-  del,
-  requestBody,
+  requestBody
 } from '@loopback/rest';
-import {Aluno} from '../models';
+import {Aluno, RolesTypes} from '../models';
 import {AlunoRepository} from '../repositories';
 
 export class AlunoController {
@@ -25,6 +24,8 @@ export class AlunoController {
     public alunoRepository : AlunoRepository,
   ) {}
 
+  @authorize({allowedRoles: [RolesTypes.Gerente, RolesTypes.Atendente]})
+  @authenticate('jwt')
   @post('/alunos', {
     responses: {
       '200': {
@@ -84,6 +85,8 @@ export class AlunoController {
     return this.alunoRepository.find(filter);
   }
 
+  @authorize({allowedRoles: [RolesTypes.Gerente, RolesTypes.Atendente]})
+  @authenticate('jwt')
   @patch('/alunos', {
     responses: {
       '200': {
@@ -106,6 +109,8 @@ export class AlunoController {
     return this.alunoRepository.updateAll(aluno, where);
   }
 
+  @authorize({allowedRoles: [RolesTypes.Gerente, RolesTypes.Atendente]})
+  @authenticate('jwt')
   @get('/alunos/{id}', {
     responses: {
       '200': {
@@ -125,6 +130,8 @@ export class AlunoController {
     return this.alunoRepository.findById(id, filter);
   }
 
+  @authorize({allowedRoles: [RolesTypes.Gerente, RolesTypes.Atendente]})
+  @authenticate('jwt')
   @patch('/alunos/{id}', {
     responses: {
       '204': {
@@ -146,6 +153,8 @@ export class AlunoController {
     await this.alunoRepository.updateById(id, aluno);
   }
 
+  @authorize({allowedRoles: [RolesTypes.Gerente, RolesTypes.Atendente]})
+  @authenticate('jwt')
   @put('/alunos/{id}', {
     responses: {
       '204': {
@@ -160,6 +169,8 @@ export class AlunoController {
     await this.alunoRepository.replaceById(id, aluno);
   }
 
+  @authorize({allowedRoles: [RolesTypes.Gerente, RolesTypes.Atendente]})
+  @authenticate('jwt')
   @del('/alunos/{id}', {
     responses: {
       '204': {
