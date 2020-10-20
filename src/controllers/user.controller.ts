@@ -128,6 +128,7 @@ export class UserController {
     return this.userRepository.create(user);
   }
 
+  @authenticate('jwt')
   @get('/users/count', {
     responses: {
       '200': {
@@ -140,6 +141,7 @@ export class UserController {
     return this.userRepository.count(where);
   }
 
+  @authenticate('jwt')
   @get('/users', {
     responses: {
       '200': {

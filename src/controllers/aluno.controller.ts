@@ -50,6 +50,7 @@ export class AlunoController {
     return this.alunoRepository.create(aluno);
   }
 
+  @authenticate('jwt')
   @get('/alunos/count', {
     responses: {
       '200': {
@@ -64,6 +65,7 @@ export class AlunoController {
     return this.alunoRepository.count(where);
   }
 
+  @authenticate('jwt')
   @get('/alunos', {
     responses: {
       '200': {
@@ -169,7 +171,7 @@ export class AlunoController {
     await this.alunoRepository.replaceById(id, aluno);
   }
 
-  @authorize({allowedRoles: [RolesTypes.Gerente, RolesTypes.Atendente]})
+  @authorize({allowedRoles: [RolesTypes.Gerente]})
   @authenticate('jwt')
   @del('/alunos/{id}', {
     responses: {

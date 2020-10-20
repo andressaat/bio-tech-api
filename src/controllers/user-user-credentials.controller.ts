@@ -1,9 +1,10 @@
+import {authenticate} from '@loopback/authentication';
 import {
   Count,
   CountSchema,
   Filter,
   repository,
-  Where,
+  Where
 } from '@loopback/repository';
 import {
   del,
@@ -13,11 +14,11 @@ import {
   param,
   patch,
   post,
-  requestBody,
+  requestBody
 } from '@loopback/rest';
 import {
   User,
-  UserCredentials,
+  UserCredentials
 } from '../models';
 import {UserRepository} from '../repositories';
 
@@ -26,6 +27,7 @@ export class UserUserCredentialsController {
     @repository(UserRepository) protected userRepository: UserRepository,
   ) { }
 
+  @authenticate('jwt')
   @get('/users/{id}/user-credentials', {
     responses: {
       '200': {
@@ -45,6 +47,7 @@ export class UserUserCredentialsController {
     return this.userRepository.userCredentials(id).get(filter);
   }
 
+  @authenticate('jwt')
   @post('/users/{id}/user-credentials', {
     responses: {
       '200': {
@@ -70,6 +73,7 @@ export class UserUserCredentialsController {
     return this.userRepository.userCredentials(id).create(userCredentials);
   }
 
+  @authenticate('jwt')
   @patch('/users/{id}/user-credentials', {
     responses: {
       '200': {
@@ -93,6 +97,7 @@ export class UserUserCredentialsController {
     return this.userRepository.userCredentials(id).patch(userCredentials, where);
   }
 
+  @authenticate('jwt')
   @del('/users/{id}/user-credentials', {
     responses: {
       '200': {

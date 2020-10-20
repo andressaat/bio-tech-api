@@ -1,3 +1,4 @@
+import {authenticate} from '@loopback/authentication';
 import {
   Count,
   CountSchema,
@@ -25,6 +26,7 @@ export class GrupoMuscularExercicioController {
     @repository(GrupoMuscularRepository) protected grupoMuscularRepository: GrupoMuscularRepository,
   ) { }
 
+  @authenticate('jwt')
   @get('/grupo-muscular/{id}/exercicios', {
     responses: {
       '200': {
@@ -44,6 +46,7 @@ export class GrupoMuscularExercicioController {
     return this.grupoMuscularRepository.exercicios(id).find(filter);
   }
 
+  @authenticate('jwt')
   @post('/grupo-muscular/{id}/exercicios', {
     responses: {
       '200': {
@@ -69,6 +72,7 @@ export class GrupoMuscularExercicioController {
     return this.grupoMuscularRepository.exercicios(id).create(exercicio);
   }
 
+  @authenticate('jwt')
   @patch('/grupo-muscular/{id}/exercicios', {
     responses: {
       '200': {
@@ -92,6 +96,7 @@ export class GrupoMuscularExercicioController {
     return this.grupoMuscularRepository.exercicios(id).patch(exercicio, where);
   }
 
+  @authenticate('jwt')
   @del('/grupo-muscular/{id}/exercicios', {
     responses: {
       '200': {

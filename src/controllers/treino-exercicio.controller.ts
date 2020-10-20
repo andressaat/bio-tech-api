@@ -1,20 +1,25 @@
+import {authenticate} from '@loopback/authentication';
 import {
   Count,
   CountSchema,
   Filter,
   FilterExcludingWhere,
   repository,
-  Where,
+  Where
 } from '@loopback/repository';
 import {
-  post,
-  param,
-  get,
-  getModelSchemaRef,
-  patch,
+  del, get,
+  getModelSchemaRef, param,
+
+
+  patch, post,
+
+
+
+
   put,
-  del,
-  requestBody,
+
+  requestBody
 } from '@loopback/rest';
 import {TreinoExercicio} from '../models';
 import {TreinoExercicioRepository} from '../repositories';
@@ -25,6 +30,7 @@ export class TreinoExercicioController {
     public treinoExercicioRepository : TreinoExercicioRepository,
   ) {}
 
+  @authenticate('jwt')
   @post('/treino-exercicios', {
     responses: {
       '200': {
@@ -49,6 +55,7 @@ export class TreinoExercicioController {
     return this.treinoExercicioRepository.create(treinoExercicio);
   }
 
+  @authenticate('jwt')
   @get('/treino-exercicios/count', {
     responses: {
       '200': {
@@ -63,6 +70,7 @@ export class TreinoExercicioController {
     return this.treinoExercicioRepository.count(where);
   }
 
+  @authenticate('jwt')
   @get('/treino-exercicios', {
     responses: {
       '200': {
@@ -84,6 +92,7 @@ export class TreinoExercicioController {
     return this.treinoExercicioRepository.find(filter);
   }
 
+  @authenticate('jwt')
   @patch('/treino-exercicios', {
     responses: {
       '200': {
@@ -106,6 +115,7 @@ export class TreinoExercicioController {
     return this.treinoExercicioRepository.updateAll(treinoExercicio, where);
   }
 
+  @authenticate('jwt')
   @get('/treino-exercicios/{id}', {
     responses: {
       '200': {
@@ -125,6 +135,7 @@ export class TreinoExercicioController {
     return this.treinoExercicioRepository.findById(id, filter);
   }
 
+  @authenticate('jwt')
   @patch('/treino-exercicios/{id}', {
     responses: {
       '204': {
@@ -146,6 +157,7 @@ export class TreinoExercicioController {
     await this.treinoExercicioRepository.updateById(id, treinoExercicio);
   }
 
+  @authenticate('jwt')
   @put('/treino-exercicios/{id}', {
     responses: {
       '204': {
@@ -160,6 +172,7 @@ export class TreinoExercicioController {
     await this.treinoExercicioRepository.replaceById(id, treinoExercicio);
   }
 
+  @authenticate('jwt')
   @del('/treino-exercicios/{id}', {
     responses: {
       '204': {

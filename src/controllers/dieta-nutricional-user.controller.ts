@@ -7,22 +7,22 @@ import {
   getModelSchemaRef, param
 } from '@loopback/rest';
 import {
-  Pagamento,
+  DietaNutricional,
   User
 } from '../models';
-import {PagamentoRepository} from '../repositories';
+import {DietaNutricionalRepository} from '../repositories';
 
-export class PagamentoUserController {
+export class DietaNutricionalUserController {
   constructor(
-    @repository(PagamentoRepository)
-    public pagamentoRepository: PagamentoRepository,
+    @repository(DietaNutricionalRepository)
+    public dietaNutricionalRepository: DietaNutricionalRepository,
   ) { }
 
   @authenticate('jwt')
-  @get('/pagamentos/{id}/user', {
+  @get('/dieta-nutricionals/{id}/user', {
     responses: {
       '200': {
-        description: 'User belonging to Pagamento',
+        description: 'User belonging to DietaNutricional',
         content: {
           'application/json': {
             schema: {type: 'array', items: getModelSchemaRef(User)},
@@ -32,8 +32,8 @@ export class PagamentoUserController {
     },
   })
   async getUser(
-    @param.path.string('id') id: typeof Pagamento.prototype.id,
+    @param.path.number('id') id: typeof DietaNutricional.prototype.id,
   ): Promise<User> {
-    return this.pagamentoRepository.user(id);
+    return this.dietaNutricionalRepository.user(id);
   }
 }

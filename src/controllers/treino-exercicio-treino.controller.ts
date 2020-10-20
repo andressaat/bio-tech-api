@@ -1,14 +1,13 @@
+import {authenticate} from '@loopback/authentication';
 import {
-  repository,
+  repository
 } from '@loopback/repository';
 import {
-  param,
   get,
-  getModelSchemaRef,
+  getModelSchemaRef, param
 } from '@loopback/rest';
 import {
-  TreinoExercicio,
-  Treino,
+  Treino, TreinoExercicio
 } from '../models';
 import {TreinoExercicioRepository} from '../repositories';
 
@@ -18,6 +17,7 @@ export class TreinoExercicioTreinoController {
     public treinoExercicioRepository: TreinoExercicioRepository,
   ) { }
 
+  @authenticate('jwt')
   @get('/treino-exercicios/{id}/treino', {
     responses: {
       '200': {
