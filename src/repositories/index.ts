@@ -8,3 +8,5 @@ export * from './user.repository';
 
 export * from './treino-exercicio.repository';
 export * from './treino.repository';
+export * from './avaliacao-fisica.repository';
+export * from './dieta-nutricional.repository';

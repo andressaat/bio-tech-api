@@ -1,3 +1,4 @@
+import {authenticate} from '@loopback/authentication';
 import {
   Count,
   CountSchema,
@@ -30,6 +31,7 @@ export class GrupoMuscularController {
     public grupoMuscularRepository : GrupoMuscularRepository,
   ) {}
 
+  @authenticate('jwt')
   @post('/grupo-muscular', {
     responses: {
       '200': {
@@ -54,6 +56,7 @@ export class GrupoMuscularController {
     return this.grupoMuscularRepository.create(grupoMuscular);
   }
 
+  @authenticate('jwt')
   @get('/grupo-muscular/count', {
     responses: {
       '200': {
@@ -68,6 +71,7 @@ export class GrupoMuscularController {
     return this.grupoMuscularRepository.count(where);
   }
 
+  @authenticate('jwt')
   @get('/grupo-muscular', {
     responses: {
       '200': {
@@ -89,6 +93,7 @@ export class GrupoMuscularController {
     return this.grupoMuscularRepository.find(filter);
   }
 
+  @authenticate('jwt')
   @patch('/grupo-muscular', {
     responses: {
       '200': {
@@ -111,6 +116,7 @@ export class GrupoMuscularController {
     return this.grupoMuscularRepository.updateAll(grupoMuscular, where);
   }
 
+  @authenticate('jwt')
   @get('/grupo-muscular/{id}', {
     responses: {
       '200': {
@@ -130,6 +136,7 @@ export class GrupoMuscularController {
     return this.grupoMuscularRepository.findById(id, filter);
   }
 
+  @authenticate('jwt')
   @patch('/grupo-muscular/{id}', {
     responses: {
       '204': {
@@ -151,6 +158,7 @@ export class GrupoMuscularController {
     await this.grupoMuscularRepository.updateById(id, grupoMuscular);
   }
 
+  @authenticate('jwt')
   @put('/grupo-muscular/{id}', {
     responses: {
       '204': {
@@ -165,6 +173,7 @@ export class GrupoMuscularController {
     await this.grupoMuscularRepository.replaceById(id, grupoMuscular);
   }
 
+  @authenticate('jwt')
   @del('/grupo-muscular/{id}', {
     responses: {
       '204': {

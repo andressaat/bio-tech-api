@@ -1,3 +1,4 @@
+import {authenticate} from '@loopback/authentication';
 import {
   Count,
   CountSchema,
@@ -29,6 +30,7 @@ export class TreinoController {
     public treinoRepository : TreinoRepository,
   ) {}
 
+  @authenticate('jwt')
   @post('/treinos', {
     responses: {
       '200': {
@@ -78,6 +80,7 @@ export class TreinoController {
     return this.treinoRepository.count(where);
   }
 
+  @authenticate('jwt')
   @get('/treinos', {
     responses: {
       '200': {
@@ -99,6 +102,7 @@ export class TreinoController {
     return this.treinoRepository.find(filter);
   }
 
+  @authenticate('jwt')
   @patch('/treinos', {
     responses: {
       '200': {
@@ -121,6 +125,7 @@ export class TreinoController {
     return this.treinoRepository.updateAll(treino, where);
   }
 
+  @authenticate('jwt')
   @get('/treinos/{id}', {
     responses: {
       '200': {
@@ -140,6 +145,7 @@ export class TreinoController {
     return this.treinoRepository.findById(id, filter);
   }
 
+  @authenticate('jwt')
   @patch('/treinos/{id}', {
     responses: {
       '204': {
@@ -161,6 +167,7 @@ export class TreinoController {
     await this.treinoRepository.updateById(id, treino);
   }
 
+  @authenticate('jwt')
   @put('/treinos/{id}', {
     responses: {
       '204': {
@@ -175,6 +182,7 @@ export class TreinoController {
     await this.treinoRepository.replaceById(id, treino);
   }
 
+  @authenticate('jwt')
   @del('/treinos/{id}', {
     responses: {
       '204': {

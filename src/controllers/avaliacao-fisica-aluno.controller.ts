@@ -7,21 +7,21 @@ import {
   getModelSchemaRef, param
 } from '@loopback/rest';
 import {
-  Aluno, Pagamento
+  Aluno, AvaliacaoFisica
 } from '../models';
-import {PagamentoRepository} from '../repositories';
+import {AvaliacaoFisicaRepository} from '../repositories';
 
-export class PagamentoAlunoController {
+export class AvaliacaoFisicaAlunoController {
   constructor(
-    @repository(PagamentoRepository)
-    public pagamentoRepository: PagamentoRepository,
+    @repository(AvaliacaoFisicaRepository)
+    public avaliacaoFisicaRepository: AvaliacaoFisicaRepository,
   ) { }
 
   @authenticate('jwt')
-  @get('/pagamentos/{id}/aluno', {
+  @get('/avaliacao-fisicas/{id}/aluno', {
     responses: {
       '200': {
-        description: 'Aluno belonging to Pagamento',
+        description: 'Aluno belonging to AvaliacaoFisica',
         content: {
           'application/json': {
             schema: {type: 'array', items: getModelSchemaRef(Aluno)},
@@ -31,8 +31,8 @@ export class PagamentoAlunoController {
     },
   })
   async getAluno(
-    @param.path.string('id') id: typeof Pagamento.prototype.id,
+    @param.path.number('id') id: typeof AvaliacaoFisica.prototype.id,
   ): Promise<Aluno> {
-    return this.pagamentoRepository.aluno(id);
+    return this.avaliacaoFisicaRepository.aluno(id);
   }
 }

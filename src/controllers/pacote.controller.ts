@@ -1,20 +1,25 @@
+import {authenticate} from '@loopback/authentication';
 import {
   Count,
   CountSchema,
   Filter,
   FilterExcludingWhere,
   repository,
-  Where,
+  Where
 } from '@loopback/repository';
 import {
-  post,
-  param,
-  get,
-  getModelSchemaRef,
-  patch,
+  del, get,
+  getModelSchemaRef, param,
+
+
+  patch, post,
+
+
+
+
   put,
-  del,
-  requestBody,
+
+  requestBody
 } from '@loopback/rest';
 import {Pacote} from '../models';
 import {PacoteRepository} from '../repositories';
@@ -25,6 +30,7 @@ export class PacoteController {
     public pacoteRepository : PacoteRepository,
   ) {}
 
+  @authenticate('jwt')
   @post('/pacotes', {
     responses: {
       '200': {
@@ -49,6 +55,7 @@ export class PacoteController {
     return this.pacoteRepository.create(pacote);
   }
 
+  @authenticate('jwt')
   @get('/pacotes/count', {
     responses: {
       '200': {
@@ -63,6 +70,7 @@ export class PacoteController {
     return this.pacoteRepository.count(where);
   }
 
+  @authenticate('jwt')
   @get('/pacotes', {
     responses: {
       '200': {
@@ -84,6 +92,7 @@ export class PacoteController {
     return this.pacoteRepository.find(filter);
   }
 
+  @authenticate('jwt')
   @patch('/pacotes', {
     responses: {
       '200': {
@@ -106,6 +115,7 @@ export class PacoteController {
     return this.pacoteRepository.updateAll(pacote, where);
   }
 
+  @authenticate('jwt')
   @get('/pacotes/{id}', {
     responses: {
       '200': {
@@ -125,6 +135,7 @@ export class PacoteController {
     return this.pacoteRepository.findById(id, filter);
   }
 
+  @authenticate('jwt')
   @patch('/pacotes/{id}', {
     responses: {
       '204': {
@@ -146,6 +157,7 @@ export class PacoteController {
     await this.pacoteRepository.updateById(id, pacote);
   }
 
+  @authenticate('jwt')
   @put('/pacotes/{id}', {
     responses: {
       '204': {
@@ -160,6 +172,7 @@ export class PacoteController {
     await this.pacoteRepository.replaceById(id, pacote);
   }
 
+  @authenticate('jwt')
   @del('/pacotes/{id}', {
     responses: {
       '204': {

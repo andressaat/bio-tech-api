@@ -1,14 +1,14 @@
+import {authenticate} from '@loopback/authentication';
 import {
-  repository,
+  repository
 } from '@loopback/repository';
 import {
-  param,
   get,
-  getModelSchemaRef,
+  getModelSchemaRef, param
 } from '@loopback/rest';
 import {
   Aluno,
-  Pacote,
+  Pacote
 } from '../models';
 import {AlunoRepository} from '../repositories';
 
@@ -18,6 +18,7 @@ export class AlunoPacoteController {
     public alunoRepository: AlunoRepository,
   ) { }
 
+  @authenticate('jwt')
   @get('/alunos/{id}/pacote', {
     responses: {
       '200': {

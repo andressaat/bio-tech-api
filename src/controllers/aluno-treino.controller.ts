@@ -1,9 +1,10 @@
+import {authenticate} from '@loopback/authentication';
 import {
   Count,
   CountSchema,
   Filter,
   repository,
-  Where,
+  Where
 } from '@loopback/repository';
 import {
   del,
@@ -13,11 +14,11 @@ import {
   param,
   patch,
   post,
-  requestBody,
+  requestBody
 } from '@loopback/rest';
 import {
   Aluno,
-  Treino,
+  Treino
 } from '../models';
 import {AlunoRepository} from '../repositories';
 
@@ -26,6 +27,7 @@ export class AlunoTreinoController {
     @repository(AlunoRepository) protected alunoRepository: AlunoRepository,
   ) { }
 
+  @authenticate('jwt')
   @get('/alunos/{id}/treinos', {
     responses: {
       '200': {
@@ -45,6 +47,7 @@ export class AlunoTreinoController {
     return this.alunoRepository.treinos(id).find(filter);
   }
 
+  @authenticate('jwt')
   @post('/alunos/{id}/treinos', {
     responses: {
       '200': {
@@ -70,6 +73,7 @@ export class AlunoTreinoController {
     return this.alunoRepository.treinos(id).create(treino);
   }
 
+  @authenticate('jwt')
   @patch('/alunos/{id}/treinos', {
     responses: {
       '200': {
@@ -93,6 +97,7 @@ export class AlunoTreinoController {
     return this.alunoRepository.treinos(id).patch(treino, where);
   }
 
+  @authenticate('jwt')
   @del('/alunos/{id}/treinos', {
     responses: {
       '200': {

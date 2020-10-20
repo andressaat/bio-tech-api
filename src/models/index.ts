@@ -1,4 +1,6 @@
 export * from './aluno.model';
+export * from './avaliacao-fisica.model';
+export * from './dieta-nutricional.model';
 export * from './exercicio.model';
 export * from './grupo-muscular.model';
 export * from './pacote.model';

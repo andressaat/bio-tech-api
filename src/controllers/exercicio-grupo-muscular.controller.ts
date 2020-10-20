@@ -1,14 +1,14 @@
+import {authenticate} from '@loopback/authentication';
 import {
-  repository,
+  repository
 } from '@loopback/repository';
 import {
-  param,
   get,
-  getModelSchemaRef,
+  getModelSchemaRef, param
 } from '@loopback/rest';
 import {
   Exercicio,
-  GrupoMuscular,
+  GrupoMuscular
 } from '../models';
 import {ExercicioRepository} from '../repositories';
 
@@ -18,6 +18,7 @@ export class ExercicioGrupoMuscularController {
     public exercicioRepository: ExercicioRepository,
   ) { }
 
+  @authenticate('jwt')
   @get('/exercicios/{id}/grupo-muscular', {
     responses: {
       '200': {
