@@ -111,7 +111,6 @@ export class AlunoController {
     return this.alunoRepository.updateAll(aluno, where);
   }
 
-  @authorize({allowedRoles: [RolesTypes.Gerente, RolesTypes.Atendente]})
   @authenticate('jwt')
   @get('/alunos/{id}', {
     responses: {
