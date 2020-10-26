@@ -1,6 +1,8 @@
 import {belongsTo, Entity, model, property, hasMany} from '@loopback/repository';
 import {Pacote, PacoteWithRelations} from './pacote.model';
 import {Treino} from './treino.model';
+import {AvaliacaoFisica} from './avaliacao-fisica.model';
+import {DietaNutricional} from './dieta-nutricional.model';
 
 @model({
   settings: {
@@ -89,6 +91,12 @@ export class Aluno extends Entity {
 
   @hasMany(() => Treino)
   treinos: Treino[];
+
+  @hasMany(() => AvaliacaoFisica)
+  avaliacoesFisicas: AvaliacaoFisica[];
+
+  @hasMany(() => DietaNutricional)
+  dietaNutricional: DietaNutricional[];
 
   constructor(data?: Partial<Aluno>) {
     super(data);

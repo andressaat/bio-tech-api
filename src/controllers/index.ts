@@ -24,3 +24,10 @@ export * from './user.controller';
 
 export * from './avaliacao-fisica.controller';
 export * from './dieta-nutricional.controller';
+export * from './aluno-avaliacao-fisica.controller';
+export * from './aluno-dieta-nutricional.controller';
+export * from './produto.controller';
+export * from './pedido.controller';
+export * from './item-pedido-produto.controller';
+export * from './item-pedido-pedido.controller';
+export * from './pedido-item-pedido.controller';
