@@ -1,4 +1,7 @@
 /* Replace with your SQL commands */
+-- Habilita o uuid
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
 CREATE TABLE biotech_schema.user_credentials
 (
     "id"              uuid PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),

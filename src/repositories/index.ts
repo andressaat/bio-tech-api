@@ -10,3 +10,6 @@ export * from './treino-exercicio.repository';
 export * from './treino.repository';
 export * from './avaliacao-fisica.repository';
 export * from './dieta-nutricional.repository';
+export * from './item-pedido.repository';
+export * from './pedido.repository';
+export * from './produto.repository';
