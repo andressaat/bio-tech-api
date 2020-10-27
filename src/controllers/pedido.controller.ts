@@ -4,19 +4,23 @@ import {
   Filter,
   FilterExcludingWhere,
   repository,
-  Where,
+  Where
 } from '@loopback/repository';
 import {
-  post,
-  param,
-  get,
-  getModelSchemaRef,
-  patch,
+  del, get,
+  getModelSchemaRef, param,
+
+
+  patch, post,
+
+
+
+
   put,
-  del,
-  requestBody,
+
+  requestBody
 } from '@loopback/rest';
-import {Pedido} from '../models';
+import {ItemPedido, Pedido, PedidoDTO} from '../models';
 import {PedidoRepository} from '../repositories';
 
 export class PedidoController {
@@ -29,7 +33,7 @@ export class PedidoController {
     responses: {
       '200': {
         description: 'Pedido model instance',
-        content: {'application/json': {schema: getModelSchemaRef(Pedido)}},
+        content: {'application/json': {schema: getModelSchemaRef(PedidoDTO)}},
       },
     },
   })
@@ -37,16 +41,28 @@ export class PedidoController {
     @requestBody({
       content: {
         'application/json': {
-          schema: getModelSchemaRef(Pedido, {
-            title: 'NewPedido',
+          schema: getModelSchemaRef(PedidoDTO, {
+            title: 'NewPedidoDTO',
             exclude: ['id'],
           }),
         },
       },
     })
-    pedido: Omit<Pedido, 'id'>,
+    pedido: Omit<PedidoDTO, 'id'>,
   ): Promise<Pedido> {
-    return this.pedidoRepository.create(pedido);
+    // return this.pedidoRepository.create(pedido);
+    const itens: ItemPedido[] = pedido.itens;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    delete (pedido as any).itens;
+    const createdPedido = await this.pedidoRepository.create(pedido);
+
+    const promises = itens.map(item =>
+      this.pedidoRepository.itens(createdPedido.id).create(item)
+    );
+
+    await Promise.all(promises);
+
+    return createdPedido;
   }
 
   @get('/pedidos/count', {
